@@ -1,0 +1,36 @@
+# input data
+left <- as.character(Customer_Report_Model$`Country/Region`)
+right <- as.character(Customer_Report_Model$`Responsible Unit`)
+measure <- Customer_Report_Model$`Overall Customers` # Backticks to handle space in column name
+
+# data prep for charting
+df_raw <- data.frame(left, right, measure, stringsAsFactors=FALSE)
+df_sorted <- df_raw[order(df_raw$left, df_raw$right), ]
+
+# Plot
+library('plotly')
+plot_ly(
+  type = 'sankey',
+  orientation = "h",
+  textfont = list(size=22, Bold =TRUE, color="000000"),
+    node = list(
+    label = c(unique(df_sorted$left), unique(df_sorted$right)),
+    color = c(rep("008E74", length(unique(df_sorted$left))), rep("4dddad", length(unique(df_sorted$right)))),
+    pad = 10,
+    thickness = 30,
+    line = list(
+      color = "Black",
+      width = 1
+    )
+  ),
+  link = list(
+    source = match(df_sorted$left, unique(df_sorted$left)) - 1,
+    target = match(df_sorted$right, unique(df_sorted$right)) + length(unique(df_sorted$left)) - 1,
+    value =  df_sorted$measure,
+    color = "rgba(0, 100, 100, 0.5)"
+  )
+ ) %>%
+   layout(
+      paper_bgcolor = "white",
+     margin = list(l = 50, r = 50, b = 50, t = 50)  # Adjust margin if needed
+  )
