@@ -1,0 +1,46 @@
+# input data
+col1 <- as.character(Customer_Report_Model$Region)
+col2 <- as.character(Customer_Report_Model$`Country/Region`)
+col3 <- as.character(Customer_Report_Model$`Responsible Unit`)
+col4 <- c("Arctic", "Arctic", "Arctic", "Non-Arctic", "Non-Arctic", "Non-Arctic")
+measure <- Customer_Report_Model$`Overall Customers`
+
+# data prep for charting
+df_raw <- data.frame(col1, col2, col3, col4 , measure, stringsAsFactors=FALSE)
+df_sorted <- df_raw[order(df_raw$col1, df_raw$col2, df_raw$col3, df_raw$col4), ]
+col1_factors <- factor(df_sorted$col1)
+col2_factors <- factor(df_sorted$col2)
+col3_factors <- factor(df_sorted$col3)
+col4_factors <- factor(df_sorted$col4)
+col1_int <- as.integer(factor(df_sorted$col1)) -1
+col2_int <- as.integer(factor(df_sorted$col2)) -1 + length(levels(col1_factors))
+col3_int <- as.integer(factor(df_sorted$col3)) -1 + length(c(levels(col1_factors), levels(col2_factors)))
+col4_int <- as.integer(factor(df_sorted$col4)) -1 + length(c(levels(col1_factors), levels(col2_factors), levels(col3_factors)))
+label <- c(levels(col1_factors), levels(col2_factors), levels(col3_factors), levels(col4_factors))
+color <- c(rep("970A82", length(unique(df_sorted$col1))),
+           rep("008FD3", length(unique(df_sorted$col2))),
+           rep("E35500", length(unique(df_sorted$col3))),
+           rep("F0AB00", length(unique(df_sorted$col4))))
+
+# Plot
+library('plotly')
+plot_ly(
+  type = 'sankey',
+  orientation = "h",
+  textfont = list(size=15),
+  node = list(
+    label = label,
+    color = color,
+    pad = 10,
+    thickness = 30,
+    line = list(
+      color = "black",
+      width = 1
+    )
+  ),
+  link = list(
+    source = c(col1_int, col2_int, col3_int),
+    target = c(col2_int, col3_int, col4_int),
+    value =  c(df_sorted$measure, df_sorted$measure, df_sorted$measure)
+  )
+)
